@@ -329,6 +329,97 @@ float lastFrame = 0.0f;
 
 #pragma endregion UpdateMethods
 
+
+// Generic Noise Function
+float random(int x, int y)
+{
+	int n = x + y * 57;
+	n = (n << 13) ^ n;
+	int t = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
+	return (1.0f - double(t) * 0.931322574615478515625e-9);
+}
+
+// Generic Smooth Function
+float smooth(int x, int y)
+{
+	float corners;
+	float sides;
+	float center;
+
+	corners = (random(x - 1, y - 1) + random(x + 1, y - 1) + random(x - 1, y + 1) + random(x + 1, y + 1)) / 16;
+	sides = (random(x - 1, y) + random(x + 1, y) + random(x, y - 1) + random(x, y + 1)) / 8;
+	center = random(x, y) / 4;
+
+	return (corners + sides + center);
+}
+
+// Interpolation of Noise
+float interpolate(float a, float b, float x)
+{
+	return(a * (1 - x) + b * x);
+}
+
+// Perlin Noise
+float linear_interpolate(float a, float b, float x)
+{
+	return (a * (1 - x) + b * x);
+}
+
+float cosine_interpolate(float a, float b, float x)
+{
+	float ft = x * 3.1415927;
+	float f = (1 - cos(ft)) * 0.5f;
+
+	return (a * (1 - f) + b * f);
+}
+
+float cubic_interpolate(float v0, float v1, float v2, float v3, float x)
+{
+	float P = v3 - v2 - v0 - v1;
+	float Q = v0 - v1 - P;
+	float R = v2 - v0;
+	float S = v1;
+
+	return (P * powf(x, 3) + Q * powf(x, 2) + R * x + S);
+}
+
+float noise(float x, float y)
+{
+	float fractional_X = x - int(x);
+	float fractional_Y = y - int(y);
+
+	// Smooths
+	float v1 = smooth(int(x), int(y));
+	float v2 = smooth(int(x) + 1, int(y));
+	float v3 = smooth(int(x), int(y) + 1);
+	float v4 = smooth(int(x) + 1, int(y) + 1);
+
+	// Interpolates
+	float i1 = interpolate(v1, v2, fractional_X);
+	float i2 = interpolate(v3, v4, fractional_X);
+
+	return (interpolate(i1, i2, fractional_Y));
+}
+
+float totalNoisePerPoint(int x, int y)
+{
+	int octaves = 8;
+	float zoom = 20.0f;
+	float persistence = 0.5f;
+	float total = 0.0f;
+
+	for (int i = 0; i < octaves - 1; i++)
+	{
+		float frequency = pow(2, i) / zoom;
+		float amplitude = pow(persistence,i);
+
+		total += noise(x * frequency, y * frequency) * amplitude;
+	}
+
+	return (total);
+}
+
+
 void glSetup()
 {
 	glfwInit();
