@@ -1,5 +1,9 @@
 // Library Includes
+#include <stdlib.h>
 #include <iostream>
+#include <vector>
+#include <ctime>
+#include <math.h>
 // Dependency Includes
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,131 +15,16 @@
 #include "ShaderLoader.h"
 #include "Camera.h"
 #include "Object.h"
+#include "Terrain.h"
 
 int width = 800, height = 600;
 GLFWwindow* window = nullptr;
-GLuint program, borderprogram;
+GLuint terrainprogram;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-#pragma region ScissorExample
-
-	void scissorExample()
-	{
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(0, 100, 800, 400);
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	}
-
-#pragma endregion ScissorExample
-
-#pragma region CullingExample
-
-	bool cullFront = false;
-
-	void cullMode()
-	{
-		cullFront = !cullFront;
-
-		if (cullFront)
-		{
-			glCullFace(GL_FRONT);
-		}
-		else
-		{
-			glCullFace(GL_BACK);
-		}
-	}
-
-#pragma endregion CullingExample
-
-#pragma region StencilExample
-
-	Object* stencil = nullptr;
-	glm::vec3 stencilPos = glm::vec3(0.0f, 0.0f, -4.0f);
-	
-	void stencilExample()
-	{
-		// Stencil Example
-		stencil = new Object(&program, &borderprogram, stencilPos);
-		stencil->LoadTexture("Resources/Textures/awesomeface.png");
-		stencil->LoadTexture("Resources/Textures/awesomeface.png");
-	}
-
-#pragma endregion StencilExample
-
-#pragma region PickingExample
-
-	Object* forwardButton = nullptr;
-	Object* backButton = nullptr;
-	glm::vec3 forwardPos = glm::vec3(-2.5f, 1.0f, -5.0f);
-	glm::vec3 backwardPos = glm::vec3(2.5f, 1.0f, -5.0f);
-
-	void pickingExample()
-	{
-		// Mouse Picking Examples
-		forwardButton = new Object(&program, &borderprogram, forwardPos, glm::vec3(1.0f, 1.0f, 1.0f), false);
-		forwardButton->LoadTexture("Resources/Textures/forward.png");
-		forwardButton->LoadTexture("Resources/Textures/forward.png");
-
-		backButton = new Object(&program, &borderprogram, backwardPos, glm::vec3(1.0f, 1.0f, 1.0f), false);
-		backButton->LoadTexture("Resources/Textures/backward.png");
-		backButton->LoadTexture("Resources/Textures/backward.png");
-	}
-
-	void moveForward()
-	{
-		stencil->position += glm::vec3(0.0f, 0.0f, 0.15f);
-	}
-
-	void moveBackward()
-	{
-		stencil->position -= glm::vec3(0.0f, 0.0f, 0.15f);
-	}
-
-#pragma endregion PickingExample
-
-#pragma region BlendingExample
-
-	std::vector<Object*> fountain;
-	glm::vec3 fountainPositions[] = {
-		// Water
-		glm::vec3(0.0f, -1.5f, -2.5f),
-		// Bricks
-		glm::vec3(0.0f, -2.0f, -2.5f),
-		glm::vec3(0.4f, -1.4f, -2.5f),
-		glm::vec3(0.0f, -1.4f, -2.9f),
-		glm::vec3(-0.4f, -1.4f, -2.5f),
-		glm::vec3(0.0f, -1.4f, -2.1f),
-	};
-
-	void blendingExample()
-	{
-		Object* bricks1 = new Object(&program, &borderprogram, fountainPositions[1]);
-		bricks1->LoadTexture("Resources/Textures/test.png");
-		Object* bricks2 = new Object(&program, &borderprogram, fountainPositions[2], glm::vec3(0.2, 0.3, 0.95));
-		bricks2->LoadTexture("Resources/Textures/test.png");
-		Object* bricks3 = new Object(&program, &borderprogram, fountainPositions[3], glm::vec3(0.95, 0.3, 0.2));
-		bricks3->LoadTexture("Resources/Textures/test.png");
-		Object* bricks4 = new Object(&program, &borderprogram, fountainPositions[4], glm::vec3(0.2, 0.3, 0.95));
-		bricks4->LoadTexture("Resources/Textures/test.png");
-		Object* bricks5 = new Object(&program, &borderprogram, fountainPositions[5], glm::vec3(0.95, 0.3, 0.2));
-		bricks5->LoadTexture("Resources/Textures/test.png");
-		Object* water = new Object(&program, &borderprogram, fountainPositions[0], glm::vec3(0.6, 0.5, 0.6));
-		water->LoadTexture("Resources/Textures/water.png");
-
-		fountain.push_back(bricks1);
-		fountain.push_back(bricks2);
-		fountain.push_back(bricks3);
-		fountain.push_back(bricks4);
-		fountain.push_back(bricks5);
-		fountain.push_back(water);
-	}
-
-#pragma endregion BlendingExample
 
 #pragma region CallbacksMethods
 
@@ -143,7 +32,7 @@ float lastFrame = 0.0f;
 	float mouseX, mouseY;
 	bool firstMouse = true;
 	bool camControl = false;
-	float lastX = 400.0f, lastY = 300.0f;
+	float lastX = width/2, lastY = height/2;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
@@ -232,45 +121,6 @@ float lastFrame = 0.0f;
 			glm::mat4 invViewMat = glm::inverse(camera.GetViewMatrix());
 			glm::vec4 rayWorld = invViewMat * eyeCoords;
 			rayDirection = glm::normalize(glm::vec3(rayWorld));
-
-			// Check for Each Button
-
-			// Check for Intersection
-			float radius = 1.0f;
-			glm::vec3 v = forwardButton->position - camera.pos;
-
-			float a = glm::dot(rayDirection, rayDirection);
-			float b = 2 * glm::dot(v, rayDirection);
-			float c = glm::dot(v, v) - radius * radius;
-			float d = b * b - 4 * a * c;
-
-			if (d > 0)
-			{
-				// Intersection
-				moveForward();
-			}
-			else if (d <= 0)
-			{
-				// No Intersection
-			}
-
-			// Check for Intersection
-			v = backButton->position - camera.pos;
-
-			a = glm::dot(rayDirection, rayDirection);
-			b = 2 * glm::dot(v, rayDirection);
-			c = glm::dot(v, v) - radius * radius;
-			d = b * b - 4 * a * c;
-
-			if (d > 0)
-			{
-				// Intersection
-				moveBackward();
-			}
-			else if (d <= 0)
-			{
-				// No Intersection
-			}
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
@@ -286,7 +136,9 @@ float lastFrame = 0.0f;
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		if (key == GLFW_KEY_F && action == GLFW_PRESS)
-			cullMode();
+		{
+
+		}
 	}
 
 #pragma endregion CallbackMethods
@@ -295,29 +147,22 @@ float lastFrame = 0.0f;
 
 	void updateCamera()
 	{
-		glUseProgram(borderprogram);
+		glUseProgram(terrainprogram);
 		// Update Camera
 		glm::mat4 proj = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 0.1f, 100.0f);
-		unsigned int projLoc = glGetUniformLocation(program, "proj");
+		unsigned int projLoc = glGetUniformLocation(terrainprogram, "proj");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 		glm::mat4 view = camera.GetViewMatrix();
-		unsigned int viewLoc = glGetUniformLocation(program, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-		glUseProgram(program);
-		// Update Camera
-		projLoc = glGetUniformLocation(program, "proj");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-		viewLoc = glGetUniformLocation(program, "view");
+		unsigned int viewLoc = glGetUniformLocation(terrainprogram, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	}
 
 	void updateScreen()
 	{
-		glClearColor(0.0f, 0.f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		updateCamera();
+		//updateCamera();
 	}
 
 	void updateDeltaTime()
@@ -329,7 +174,7 @@ float lastFrame = 0.0f;
 
 #pragma endregion UpdateMethods
 
-
+#pragma region terrainNoise
 // Generic Noise Function
 float random(int x, int y)
 {
@@ -418,15 +263,16 @@ float totalNoisePerPoint(int x, int y)
 
 	return (total);
 }
-
+#pragma endregion terrainNoise
 
 void glSetup()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	//glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
 
@@ -452,18 +298,7 @@ void glSetup()
 		system("PAUSE");
 	}
 	
-	// Depth + Stencil
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-	// Backface Culling
-	// Culling
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
+	glViewport(0, 0, width, height);
 
 	// AntiAliasing
 	glEnable(GL_MULTISAMPLE);
@@ -479,43 +314,50 @@ int main()
 	glSetup();
 
 	// Setup Programs
-	program = ShaderLoader::CreateProgram("Resources/Shaders/vertexshader.vs", "Resources/Shaders/fragmentshader.fs");
-	borderprogram = ShaderLoader::CreateProgram("Resources/Shaders/vertexshader.vs", "Resources/Shaders/fragbordershader.fs");
+	terrainprogram = ShaderLoader::CreateProgram("Resources/Shaders/terrainvs.vs", "Resources/Shaders/terrainfs.fs");
+	Terrain terrain("Resources/Textures/height.png", &terrainprogram);
 
-	// Setup Examples
-	blendingExample();
-	stencilExample();
-	pickingExample();
-	   	 
-	// Game Loop
-	while (!glfwWindowShouldClose(window))
-	{
-		updateDeltaTime();
-		processInput(window);
-		updateScreen();
+	if (terrain.getHeight() != 0 && terrain.getWidth() != 0) {
 
-		// Scissor Example
-		scissorExample();
+		glm::mat4 view;
+		glm::mat4 projection;
 
-		// Render Stenciled Object		
-		stencil->Render(camera.pos);
-		stencil->DrawBorder(camera.pos);
 
-		// Render Blending Object
-		for (int i = 0; i < fountain.size(); i++)
+		projection = glm::perspective(camera.fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
+		// Game Loop
+		while (!glfwWindowShouldClose(window))
 		{
-			fountain.at(i)->Render(camera.pos);
+			updateDeltaTime();
+			processInput(window);
+
+			updateScreen();
+
+			glm::mat4 view;
+			view = camera.GetViewMatrix();
+			glm::mat4 projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+			glm::mat4 model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+			glUseProgram(terrainprogram);
+			terrain.setUniforms(model, view, projection);
+			terrain.bindData();
+
+			terrain.draw();
+
+
+
+			// Poll Events & Swap Buffers
+			glfwSwapBuffers(window);
+			glfwPollEvents();
 		}
-
-		// Render MousePicking Objects
-		forwardButton->Render(camera.pos);
-		backButton->Render(camera.pos);
-
-		glDisable(GL_SCISSOR_TEST);
-
-		// Poll Events & Swap Buffers
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+	}
+	else
+	{
+		std::cout << "terrain size = 0" << std::endl;
 	}
 
 	// End Program

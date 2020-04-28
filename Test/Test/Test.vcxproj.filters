@@ -21,6 +21,12 @@
     <ClCompile Include="ShaderLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Resources\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +44,12 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\fragmentshader.fs">
@@ -47,6 +59,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\fragbordershader.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\terrainfs.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\terrainvs.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

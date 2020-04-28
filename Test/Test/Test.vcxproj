@@ -70,19 +70,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\glad;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\Resources\Libs\GLFW;$(ProjectDir)\Resources\Libs\soil;$(ProjectDir)\Resources\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\glad;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\Resources\Libs\GLFW;$(ProjectDir)\Resources\Libs\soil;$(ProjectDir)\Resources\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\glad;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\Resources\Libs\GLFW;$(ProjectDir)\Resources\Libs\soil;$(ProjectDir)\Resources\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\glad;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\Resources\Includes\GLFW;$(ProjectDir)\Resources\Includes\KHR;$(ProjectDir)\Resources\Includes\soil;$(ProjectDir)\Resources\Includes\glm;$(ProjectDir)\Resources\Includes;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\Resources\Libs\GLFW;$(ProjectDir)\Resources\Libs\soil;$(ProjectDir)\Resources\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -142,19 +142,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Buffers.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Resources\glad.c" />
     <ClCompile Include="ShaderLoader.cpp" />
+    <ClCompile Include="Terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderLoader.h" />
+    <ClInclude Include="Terrain.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\fragbordershader.fs" />
     <None Include="Resources\Shaders\fragmentshader.fs" />
+    <None Include="Resources\Shaders\terrainfs.fs" />
+    <None Include="Resources\Shaders\terrainvs.vs" />
     <None Include="Resources\Shaders\vertexshader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
