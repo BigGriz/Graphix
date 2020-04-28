@@ -145,24 +145,10 @@ float lastFrame = 0.0f;
 
 #pragma region UpdateMethods
 
-	void updateCamera()
-	{
-		glUseProgram(terrainprogram);
-		// Update Camera
-		glm::mat4 proj = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 0.1f, 100.0f);
-		unsigned int projLoc = glGetUniformLocation(terrainprogram, "proj");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
-		glm::mat4 view = camera.GetViewMatrix();
-		unsigned int viewLoc = glGetUniformLocation(terrainprogram, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	}
-
 	void updateScreen()
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//updateCamera();
 	}
 
 	void updateDeltaTime()
@@ -303,6 +289,9 @@ void glSetup()
 	// AntiAliasing
 	glEnable(GL_MULTISAMPLE);
 
+	// Polygon Mode
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	// Blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -317,48 +306,20 @@ int main()
 	terrainprogram = ShaderLoader::CreateProgram("Resources/Shaders/terrainvs.vs", "Resources/Shaders/terrainfs.fs");
 	Terrain terrain("Resources/Textures/height.png", &terrainprogram);
 
-	if (terrain.getHeight() != 0 && terrain.getWidth() != 0) {
-
-		glm::mat4 view;
-		glm::mat4 projection;
-
-
-		projection = glm::perspective(camera.fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
-
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-
-		// Game Loop
-		while (!glfwWindowShouldClose(window))
-		{
-			updateDeltaTime();
-			processInput(window);
-
-			updateScreen();
-
-			glm::mat4 view;
-			view = camera.GetViewMatrix();
-			glm::mat4 projection = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
-			glm::mat4 model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-
-			glUseProgram(terrainprogram);
-			terrain.setUniforms(model, view, projection);
-			terrain.bindData();
-
-			terrain.draw();
-
-
-
-			// Poll Events & Swap Buffers
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-		}
-	}
-	else
+	// Game Loop
+	while (!glfwWindowShouldClose(window))
 	{
-		std::cout << "terrain size = 0" << std::endl;
+		updateDeltaTime();
+		processInput(window);
+		updateScreen();
+
+		terrain.Render(&camera);
+
+		// Poll Events & Swap Buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
+	
 
 	// End Program
 	glfwTerminate();
