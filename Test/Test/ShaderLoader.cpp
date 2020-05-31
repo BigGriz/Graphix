@@ -28,9 +28,9 @@ ShaderLoader::~ShaderLoader(void) {}
 //*******************Create Shader Program**********************//
 // Description      : Create program from vertex + frag shader.	//
 // @params			: Pathname for vertex + frag shaders		//
-// @return GLuint	: Program # to Store							//
+// @return GLuint	: Program # to Store						//
 //**************************************************************// 
-GLuint ShaderLoader::CreateProgram(const char* vertexShaderFilename, const char* fragmentShaderFilename)
+GLuint ShaderLoader::CreateProgram(const char* vertexShaderFilename, const char* fragmentShaderFilename, const char* geometryShaderFilename)
 {
 	// Append Shader Filenames
 	std::string programName(vertexShaderFilename);
@@ -49,6 +49,7 @@ GLuint ShaderLoader::CreateProgram(const char* vertexShaderFilename, const char*
 
 		GLuint vertexshader;
 		GLuint fragmentshader;
+		GLuint geoshader;
 
 		// Check if vertex already exists in map
 		// If not, create shader
@@ -76,9 +77,200 @@ GLuint ShaderLoader::CreateProgram(const char* vertexShaderFilename, const char*
 			fragmentshader = shaderMap.find(fragmentShaderFilename)->second;
 		}
 
+		// Check if geometry already exists in map
+		// If not, create shader
+		if (shaderMap.find(geometryShaderFilename) == shaderMap.end())
+		{
+			geoshader = CreateShader(GL_GEOMETRY_SHADER, geometryShaderFilename);
+			shaderMap[geometryShaderFilename] = geoshader;
+		}
+		// If so, load shader
+		else
+		{
+			geoshader = shaderMap.find(geometryShaderFilename)->second;
+		}
+
 		// Attach shaders to program
 		glAttachShader(program, vertexshader);
 		glAttachShader(program, fragmentshader);
+		glAttachShader(program, geoshader);
+
+		// Link program
+		glLinkProgram(program);
+
+		// Check for link errors
+		int link_result = 0;
+		glGetProgramiv(program, GL_LINK_STATUS, &link_result);
+		if (link_result == GL_FALSE)
+		{
+			std::string programName = vertexShaderFilename + *fragmentShaderFilename + *geometryShaderFilename;
+			PrintErrorDetails(false, program, programName.c_str());
+			return (0);
+		}
+
+		// Save program to map
+		programMap[programName] = program;
+
+		return program;
+	}
+
+	return (0);
+}
+GLuint ShaderLoader::CreateProgram(const char* vertexShaderFilename, const char* fragmentShaderFilename)
+{
+	// Append Shader Filenames
+	std::string programName(vertexShaderFilename);
+	programName.append(fragmentShaderFilename);
+
+	// Check if Program with Filename = Appended already exists
+	// If so return program
+	if (programMap.find(programName) != programMap.end())
+	{
+		GLuint program = programMap.find(programName)->second;
+	}
+	// If not create new program
+	else
+	{
+		GLuint program = glCreateProgram();
+
+		GLuint vertexshader;
+		GLuint fragmentshader;
+		GLuint geoshader;
+
+		// Check if vertex already exists in map
+		// If not, create shader
+		if (shaderMap.find(vertexShaderFilename) == shaderMap.end())
+		{
+			vertexshader = CreateShader(GL_VERTEX_SHADER, vertexShaderFilename);
+			shaderMap[vertexShaderFilename] = vertexshader;
+		}
+		// If so, load shader
+		else
+		{
+			vertexshader = shaderMap.find(vertexShaderFilename)->second;
+		}
+
+		// Check if fragment already exists in map
+		// If not, create shader
+		if (shaderMap.find(fragmentShaderFilename) == shaderMap.end())
+		{
+			fragmentshader = CreateShader(GL_FRAGMENT_SHADER, fragmentShaderFilename);
+			shaderMap[fragmentShaderFilename] = fragmentshader;
+		}
+		// If so, load shader
+		else
+		{
+			fragmentshader = shaderMap.find(fragmentShaderFilename)->second;
+		}
+
+		
+		// Attach shaders to program
+		glAttachShader(program, vertexshader);
+		glAttachShader(program, fragmentshader);
+
+		// Link program
+		glLinkProgram(program);
+
+		// Check for link errors
+		int link_result = 0;
+		glGetProgramiv(program, GL_LINK_STATUS, &link_result);
+		if (link_result == GL_FALSE)
+		{
+			std::string programName = vertexShaderFilename + *fragmentShaderFilename;
+			PrintErrorDetails(false, program, programName.c_str());
+			return (0);
+		}
+
+		// Save program to map
+		programMap[programName] = program;
+
+		return program;
+	}
+
+	return (0);
+}
+GLuint ShaderLoader::CreateProgram(const char* vertexShaderFilename, const char* fragmentShaderFilename, const char* TessControlShaderFilename, const char* TessEvalShaderFilename)
+{
+	// Append Shader Filenames
+	std::string programName(vertexShaderFilename);
+	programName.append(fragmentShaderFilename);
+	programName.append(TessControlShaderFilename);
+	programName.append(TessEvalShaderFilename);
+
+	// Check if Program with Filename = Appended already exists
+	// If so return program
+	if (programMap.find(programName) != programMap.end())
+	{
+		GLuint program = programMap.find(programName)->second;
+	}
+	// If not create new program
+	else
+	{
+		GLuint program = glCreateProgram();
+
+		GLuint vertexshader;
+		GLuint fragmentshader;
+		GLuint tcsshader;
+		GLuint tesshader;
+
+		// Check if vertex already exists in map
+		// If not, create shader
+		if (shaderMap.find(vertexShaderFilename) == shaderMap.end())
+		{
+			vertexshader = CreateShader(GL_VERTEX_SHADER, vertexShaderFilename);
+			shaderMap[vertexShaderFilename] = vertexshader;
+		}
+		// If so, load shader
+		else
+		{
+			vertexshader = shaderMap.find(vertexShaderFilename)->second;
+		}
+
+		// Check if fragment already exists in map
+		// If not, create shader
+		if (shaderMap.find(fragmentShaderFilename) == shaderMap.end())
+		{
+			fragmentshader = CreateShader(GL_FRAGMENT_SHADER, fragmentShaderFilename);
+			shaderMap[fragmentShaderFilename] = fragmentshader;
+		}
+		// If so, load shader
+		else
+		{
+			fragmentshader = shaderMap.find(fragmentShaderFilename)->second;
+		}
+
+		// Check if tcs already exists in map
+		// If not, create shader
+		if (shaderMap.find(TessControlShaderFilename) == shaderMap.end())
+		{
+			tcsshader = CreateShader(GL_TESS_CONTROL_SHADER, TessControlShaderFilename);
+			shaderMap[TessControlShaderFilename] = tcsshader;
+		}
+		// If so, load shader
+		else
+		{
+			tcsshader = shaderMap.find(TessControlShaderFilename)->second;
+		}
+
+		// Check if tes already exists in map
+		// If not, create shader
+		if (shaderMap.find(TessEvalShaderFilename) == shaderMap.end())
+		{
+			tesshader = CreateShader(GL_TESS_EVALUATION_SHADER, TessEvalShaderFilename);
+			shaderMap[TessEvalShaderFilename] = tesshader;
+		}
+		// If so, load shader
+		else
+		{
+			tesshader = shaderMap.find(TessEvalShaderFilename)->second;
+		}
+
+
+		// Attach shaders to program
+		glAttachShader(program, vertexshader);
+		glAttachShader(program, fragmentshader);
+		glAttachShader(program, tcsshader);
+		glAttachShader(program, tesshader);
 
 		// Link program
 		glLinkProgram(program);

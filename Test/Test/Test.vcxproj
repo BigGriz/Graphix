@@ -150,16 +150,25 @@
   <ItemGroup>
     <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="GeometryModel.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderLoader.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TessModel.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\fragbordershader.fs" />
-    <None Include="Resources\Shaders\fragmentshader.fs" />
+    <None Include="Resources\Shaders\fragshader.fs" />
+    <None Include="Resources\Shaders\geoshader.gs" />
+    <None Include="Resources\Shaders\passthrough.gs" />
+    <None Include="Resources\Shaders\quadpatch.tes" />
+    <None Include="Resources\Shaders\startestfrag.fs" />
+    <None Include="Resources\Shaders\startestvertex.vs" />
     <None Include="Resources\Shaders\terrainfs.fs" />
     <None Include="Resources\Shaders\terrainvs.vs" />
+    <None Include="Resources\Shaders\tessfrag.fs" />
+    <None Include="Resources\Shaders\tessolationshader.tcs" />
+    <None Include="Resources\Shaders\tessvertex.vs" />
     <None Include="Resources\Shaders\vertexshader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

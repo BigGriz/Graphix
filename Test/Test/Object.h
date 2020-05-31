@@ -1,14 +1,30 @@
+/***
+  Bachelor of Software Engineering
+  Media Design School
+  Auckland
+  New Zealand
+
+  (c) 2020 Media Design School
+
+  File Name   :   Object.h
+  Description :   Object Class Declaration & Implementation
+  Date		  :	  14/05/2020
+  Author      :   Wayd Barton-Redgrave
+  Mail        :   wayd.bar8374@mediadesign.school.nz
+***/
 #pragma once
+// Library Includes
+#include <vector>
+#include <iostream>
+// Dependency Includes
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <soil/SOIL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <vector>
-#include <iostream>
 
-
+// Class Declaration
 class Object
 {
 	public:
@@ -21,23 +37,26 @@ class Object
 		glm::vec3 scale;
 		bool fog = false;
 
+		int x = 0, z = 0;
+
+		// Vector of Textures
 		std::vector<unsigned int> textures;
 
+		// Constructor & Destructors
 		Object() {};
-		Object(GLuint* _program, GLuint* _border, glm::vec3 _position, glm::vec3 _scale = glm::vec3(1.0f, 1.0f, 1.0f), bool _fog = true)
+		Object(GLuint* _program, const char* _filename, glm::vec3 _position, glm::vec3 _scale = glm::vec3(1.0f, 1.0f, 1.0f), bool _fog = true)
 		{
 			position = _position;
-			SetupObject(_program, _border);
+			SetupObject(_program, _filename);
 			scale = _scale;
-			fog = _fog;			
+			fog = _fog;
 		}
 		~Object() {};
 
-		void SetupObject(GLuint* _program, GLuint* _border)
+		// Setup Functions
+		void SetupObject(GLuint* _program, const char* _filename)
 		{
-			
 			program = _program;
-			border = _border;
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
@@ -56,8 +75,10 @@ class Object
 			// Texture Attributes
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 			glEnableVertexAttribArray(1);
-		}
 
+			LoadTexture(_filename);
+			LoadTexture(_filename);
+		}
 		void LoadTexture(const char* _filename)
 		{
 			unsigned int tempTex;
@@ -87,15 +108,19 @@ class Object
 			glUseProgram(*program);
 			(textures.empty()) ? glUniform1i(glGetUniformLocation(*program, "texture1"), 0) : glUniform1i(glGetUniformLocation(*program, "texture2"), 1);
 
-			glUseProgram(*border);
-			(textures.empty()) ? glUniform1i(glGetUniformLocation(*border, "texture1"), 0) : glUniform1i(glGetUniformLocation(*border, "texture2"), 1);
 
 			textures.push_back(tempTex);
 		}
-
-		void Render(glm::vec3 _cameraPos)
+		// Rendering Functionality
+		void Render()
 		{
-			// bind textures on corresponding texture units
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			glFrontFace(GL_CCW);
+
+			glUseProgram(*program);
+
+			// Bind Textures on Corresponding Texture Units
 			for (int i = 0; i < textures.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + i);
@@ -106,8 +131,7 @@ class Object
 			glStencilFunc(GL_ALWAYS, 1, 0xFF);
 			glStencilMask(0xFF);
 
-			// First Pass
-			glUseProgram(*program);
+		
 			glBindVertexArray(VAO);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures.at(0));
@@ -122,32 +146,7 @@ class Object
 			glUniform1i(fogLoc, fog);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-			
-		}
-
-		void DrawBorder(glm::vec3 _cameraPos)
-		{
-	
-			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-			glStencilMask(0x00);
-			// Second Pass
-			glUseProgram(*border);
-			// Draw
-			float scaleUp = 1.1;
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, position);
-			model = glm::scale(model, scale);
-			model = glm::scale(model, glm::vec3(scaleUp, scaleUp, scaleUp));
-			unsigned int modelLoc = glGetUniformLocation(*border, "model");
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-			unsigned int fogLoc = glGetUniformLocation(*border, "fog");
-			glUniform1i(fogLoc, fog);
-			
 			glBindVertexArray(0);
-			
-			glStencilMask(0xFF);
-			glDisable(GL_STENCIL_TEST);
 		}
 
 		float vertices[180] = {
@@ -197,7 +196,7 @@ class Object
 		GLuint indices[36] = {  //Tell OpenGL What triangle uses what Vertecies
 			 0, 1, 3,   //Back Quad
 			 1, 2, 3,
-			 0, 1, 4,    //Right Quad
+			 0, 1, 4,   //Right Quad
 			 1, 5, 4,
 			 2, 3, 7,   //Left Quad
 			 2, 6, 7,

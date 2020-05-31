@@ -1,4 +1,19 @@
+/***
+  Bachelor of Software Engineering
+  Media Design School
+  Auckland
+  New Zealand
+
+  (c) 2020 Media Design School
+
+  File Name   :   Buffers.h
+  Description :   Vertex & Index Buffer Class Declarations & Implementation
+  Date		  :	  14/05/2020
+  Author      :   Wayd Barton-Redgrave
+  Mail        :   wayd.bar8374@mediadesign.school.nz
+***/
 #pragma once
+
 // Library Includes
 #include <vector>
 // Dependency Includes
@@ -26,7 +41,6 @@ class VertexBuffer
 		{
 			glDeleteBuffers(1, &bufferId);
 		}
-
 
 		void setVertexAttribPointer(int _offset, int _loc, int _num, int _stride)
 		{

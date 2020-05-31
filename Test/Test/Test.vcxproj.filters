@@ -35,9 +35,6 @@
     <ClInclude Include="ShaderLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -47,21 +44,51 @@
     <ClInclude Include="Buffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TessModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\fragmentshader.fs">
+    <None Include="Resources\Shaders\terrainfs.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\terrainvs.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\fragshader.fs">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\vertexshader.vs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\fragbordershader.fs">
+    <None Include="Resources\Shaders\geoshader.gs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\terrainfs.fs">
+    <None Include="Resources\Shaders\passthrough.gs">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\terrainvs.vs">
+    <None Include="Resources\Shaders\startestfrag.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\startestvertex.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\quadpatch.tes">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\tessfrag.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\tessvertex.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\tessolationshader.tcs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

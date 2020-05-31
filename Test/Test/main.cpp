@@ -1,3 +1,18 @@
+/***
+  Bachelor of Software Engineering
+  Media Design School
+  Auckland
+  New Zealand
+
+  (c) 2020 Media Design School
+
+  File Name   :   main.cpp
+  Description :   Main Implementation
+  Date		  :	  14/05/2020
+  Author      :   Wayd Barton-Redgrave
+  Mail        :   wayd.bar8374@mediadesign.school.nz
+***/
+
 // Library Includes
 #include <stdlib.h>
 #include <iostream>
@@ -14,17 +29,32 @@
 // Local Includes
 #include "ShaderLoader.h"
 #include "Camera.h"
-#include "Object.h"
 #include "Terrain.h"
+#include "Object.h"
+// Test Includes
+#include "GeometryModel.h"
+#include "TessModel.h"
 
+// Window Dimensions
 int width = 800, height = 600;
 GLFWwindow* window = nullptr;
-GLuint terrainprogram;
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+// Shader Programs
+GLuint terrainprogram;
+GLuint objprogram;
+
+// Shader Tests
+GeometryModel* geomModel;
+GLuint starprogram;
+TessModel* tessModel;
+GLuint tesprogram;
+// Moveable Object and Terrain
+Object* object;
+Terrain* terrain;
+// Camera 
+Camera camera(glm::vec3(44.39f, 6.8f, 45.7f), glm::vec3(-0.131, 0.98, -0.146));
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
 
 #pragma region CallbacksMethods
 
@@ -42,11 +72,12 @@ float lastFrame = 0.0f;
 	void processInput(GLFWwindow* window)
 	{
 		const float cameraSpeed = 2.5f * deltaTime;
-
+		// Quit Window
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, true);
 		}
+		// Cam Control
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
 			camera.ProcessKeyBoard(FORWARD, deltaTime);
@@ -62,6 +93,49 @@ float lastFrame = 0.0f;
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		{
 			camera.ProcessKeyBoard(RIGHT, deltaTime);
+		}
+		// Object Control
+		/*if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		{
+			if (object->x < 255)
+			{
+				object->x++;
+			}
+			object->position = terrain->vertices[object->x + object->z * 256];
+			object->position.y = terrain->vertices[object->x + object->z * 256].y + 0.1f;
+		}
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		{
+			if (object->x > 0)
+			{
+				object->x--;
+			}
+			object->position = terrain->vertices[object->x + object->z * 256];
+			object->position.y = terrain->vertices[object->x + object->z * 256].y + 0.1f;
+		}
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		{
+			if (object->z < 255)
+			{
+				object->z++;
+			}
+			object->position = terrain->vertices[object->x + object->z * 256];
+			object->position.y = terrain->vertices[object->x + object->z * 256].y + 0.1f;
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		{
+			if (object->z > 0)
+			{
+				object->z--;
+			}
+			object->position = terrain->vertices[object->x + object->z * 256];
+			object->position.y = terrain->vertices[object->x + object->z * 256].y + 0.1f;
+		}*/
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		{
+			std::cout << "x: " << camera.pos.x << std::endl;
+			std::cout << "y: " << camera.pos.y << std::endl;
+			std::cout << "z: " << camera.pos.z << std::endl;
 		}
 	}
 
@@ -145,10 +219,40 @@ float lastFrame = 0.0f;
 
 #pragma region UpdateMethods
 
+	void updateCamera()
+	{
+		/*glUseProgram(objprogram);
+		// Update Camera
+		glm::mat4 proj = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 0.1f, 100.0f);
+		unsigned int projLoc = glGetUniformLocation(objprogram, "proj");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+		glm::mat4 view = camera.GetViewMatrix();
+		unsigned int viewLoc = glGetUniformLocation(objprogram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));*/
+
+		glUseProgram(terrainprogram);
+		// Update Camera
+		glm::mat4 proj = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 0.1f, 100.0f);
+		unsigned int projLoc = glGetUniformLocation(terrainprogram, "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+		glm::mat4 view = camera.GetViewMatrix();
+		unsigned int viewLoc = glGetUniformLocation(terrainprogram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+		/*glUseProgram(starprogram);
+		// Update Camera
+		projLoc = glGetUniformLocation(starprogram, "proj");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+		viewLoc = glGetUniformLocation(starprogram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));*/
+	}
+
 	void updateScreen()
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		updateCamera();
 	}
 
 	void updateDeltaTime()
@@ -160,103 +264,12 @@ float lastFrame = 0.0f;
 
 #pragma endregion UpdateMethods
 
-#pragma region terrainNoise
-// Generic Noise Function
-float random(int x, int y)
-{
-	int n = x + y * 57;
-	n = (n << 13) ^ n;
-	int t = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
-	return (1.0f - double(t) * 0.931322574615478515625e-9);
-}
-
-// Generic Smooth Function
-float smooth(int x, int y)
-{
-	float corners;
-	float sides;
-	float center;
-
-	corners = (random(x - 1, y - 1) + random(x + 1, y - 1) + random(x - 1, y + 1) + random(x + 1, y + 1)) / 16;
-	sides = (random(x - 1, y) + random(x + 1, y) + random(x, y - 1) + random(x, y + 1)) / 8;
-	center = random(x, y) / 4;
-
-	return (corners + sides + center);
-}
-
-// Interpolation of Noise
-float interpolate(float a, float b, float x)
-{
-	return(a * (1 - x) + b * x);
-}
-
-// Perlin Noise
-float linear_interpolate(float a, float b, float x)
-{
-	return (a * (1 - x) + b * x);
-}
-
-float cosine_interpolate(float a, float b, float x)
-{
-	float ft = x * 3.1415927;
-	float f = (1 - cos(ft)) * 0.5f;
-
-	return (a * (1 - f) + b * f);
-}
-
-float cubic_interpolate(float v0, float v1, float v2, float v3, float x)
-{
-	float P = v3 - v2 - v0 - v1;
-	float Q = v0 - v1 - P;
-	float R = v2 - v0;
-	float S = v1;
-
-	return (P * powf(x, 3) + Q * powf(x, 2) + R * x + S);
-}
-
-float noise(float x, float y)
-{
-	float fractional_X = x - int(x);
-	float fractional_Y = y - int(y);
-
-	// Smooths
-	float v1 = smooth(int(x), int(y));
-	float v2 = smooth(int(x) + 1, int(y));
-	float v3 = smooth(int(x), int(y) + 1);
-	float v4 = smooth(int(x) + 1, int(y) + 1);
-
-	// Interpolates
-	float i1 = interpolate(v1, v2, fractional_X);
-	float i2 = interpolate(v3, v4, fractional_X);
-
-	return (interpolate(i1, i2, fractional_Y));
-}
-
-float totalNoisePerPoint(int x, int y)
-{
-	int octaves = 8;
-	float zoom = 20.0f;
-	float persistence = 0.5f;
-	float total = 0.0f;
-
-	for (int i = 0; i < octaves - 1; i++)
-	{
-		float frequency = pow(2, i) / zoom;
-		float amplitude = pow(persistence,i);
-
-		total += noise(x * frequency, y * frequency) * amplitude;
-	}
-
-	return (total);
-}
-#pragma endregion terrainNoise
-
 void glSetup()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
@@ -290,11 +303,15 @@ void glSetup()
 	glEnable(GL_MULTISAMPLE);
 
 	// Polygon Mode
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Blending
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// Culling
+	glFrontFace(GL_CCW);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 }
 
 int main()
@@ -302,9 +319,25 @@ int main()
 	// Setup OpenGL Stuff
 	glSetup();
 
-	// Setup Programs
+	// Seed RNG
+	srand((unsigned)time(0));
+	// Heightmap Program + Object
 	terrainprogram = ShaderLoader::CreateProgram("Resources/Shaders/terrainvs.vs", "Resources/Shaders/terrainfs.fs");
-	Terrain terrain("Resources/Textures/height.png", &terrainprogram);
+	terrain = new Terrain("Resources/Textures/height.png", &terrainprogram);
+	//// Object Program + Object
+	//objprogram = ShaderLoader::CreateProgram("Resources/Shaders/vertexshader.vs", "Resources/Shaders/fragshader.fs");	
+	//object = new Object(&objprogram, "Resources/Textures/awesomeface.png", glm::vec3(terrain->vertices.at(0)), glm::vec3(0.01f, 0.01f, 0.01f));
+	//// Geo Program + Star
+	//starprogram = ShaderLoader::CreateProgram("Resources/Shaders/startestvertex.vs", "Resources/Shaders/startestfrag.fs", "Resources/Shaders/geoshader.gs");
+	//// Tess Program + Test
+	//tesprogram = ShaderLoader::CreateProgram("Resources/Shaders/tessvertex.vs", "Resources/Shaders/tessfrag.fs", "Resources/Shaders/tessolationshader.tcs", "Resources/Shaders/quadpatch.tes");
+	//
+	//// Tests
+	//geomModel = new GeometryModel(&starprogram, &camera);
+	//geomModel->position = terrain->vertices.at(0);
+	
+	// Constructor crashed on generating buffer for VBO and I don't know why
+	//tessModel = new TessModel(&tesprogram, &camera);
 
 	// Game Loop
 	while (!glfwWindowShouldClose(window))
@@ -312,8 +345,13 @@ int main()
 		updateDeltaTime();
 		processInput(window);
 		updateScreen();
+		
 
-		terrain.Render(&camera);
+		//object->Render();
+		terrain->Render();
+
+		//geomModel->Render();
+		//tessModel->Render();
 
 		// Poll Events & Swap Buffers
 		glfwSwapBuffers(window);
